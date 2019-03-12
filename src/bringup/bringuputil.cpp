@@ -18,6 +18,7 @@
 
 #include "bringuputil.h"
 #include "../validjsonvalues.h"
+#include "../device/razerclassicdevice.h"
 #include "../device/razermatrixdevice.h"
 
 #include <QJsonArray>
@@ -41,6 +42,34 @@ const QVector<QVector<RazerDeviceQuirks>> quirksCombinations {
     {RazerDeviceQuirks::MouseMatrix, RazerDeviceQuirks::MatrixBrightness},
     {RazerDeviceQuirks::MatrixBrightness}
 };
+
+RazerDevice *BringupUtil::tryDevice(QString pclass, QStringList fx, QStringList features, QVector<RazerDeviceQuirks> quirks)
+{
+    RazerDevice *device;
+    if (pclass == "classic") {
+        device = new RazerClassicDevice(hid_dev_info->path, hid_dev_info->vendor_id, hid_dev_info->product_id, /*name*/ "", /*type*/ "", allLedIds, minimalFx, validFeatures, quirks, /*dims*/{}, /*maxDPI*/0);
+    } else if (pclass == "matrix") {
+        device = new RazerMatrixDevice(hid_dev_info->path, hid_dev_info->vendor_id, hid_dev_info->product_id, /*name*/ "", /*type*/ "", allLedIds, validFx, validFeatures, quirks, /*dims*/{}, /*maxDPI*/0);
+    } else {
+        qFatal("Unhandled pclass in BringupUtil::tryDevice");
+        return nullptr;
+    }
+
+    if (!device->openDeviceHandle()) {
+        qCritical("Failed to open device handle.");
+        qCritical("You can give your current user permissions to access the hidraw nodes with the following commands:");
+        qCritical("$ sudo chmod g+rw /dev/hidraw*");
+        qCritical("$ sudo chgrp $(id -g) /dev/hidraw*");
+        qFatal("Exiting now.");
+    }
+    if (!device->initialize()) {
+        qWarning("Failed to initialize device.");
+        delete device;
+        return nullptr;
+    }
+    qInfo("Successfully initialized LEDs.");
+    return device;
+}
 
 bool BringupUtil::newDevice()
 {
@@ -69,39 +98,34 @@ bool BringupUtil::newDevice()
         return false;
     }
 
-    QVector<RazerLedId> allLedIds = {RazerLedId::ScrollWheelLED, RazerLedId::BatteryLED, RazerLedId::LogoLED, RazerLedId::BacklightLED, RazerLedId::MacroRecordingLED, RazerLedId::GameModeLED, RazerLedId::KeymapRedLED, RazerLedId::KeymapGreenLED, RazerLedId::KeymapBlueLED, RazerLedId::RightSideLED, RazerLedId::LeftSideLED};
     QVector<RazerLedId> ledIds = {};
     QStringList features = {};
-    QVector<RazerDeviceQuirks> quirks = quirksCombinations.at(0);
     MatrixDimensions dims = {};
     ushort maxDPI = 0;
-    RazerDevice *device;
-    int quirksCombinationsIndex = 0;
-    do {
-        device = new RazerMatrixDevice(hid_dev_info->path, hid_dev_info->vendor_id, hid_dev_info->product_id, name, type, allLedIds, validFx, validFeatures, quirks, dims, maxDPI);
-        if (!device->openDeviceHandle()) {
-            qCritical("Failed to open device handle.");
-            qCritical("You can give your current user permissions to access the hidraw nodes with the following commands:");
-            qCritical("$ sudo chmod g+rw /dev/hidraw*");
-            qCritical("$ sudo chgrp $(id -g) /dev/hidraw*");
-            delete device;
-            return true;
-        }
-        if (!device->initialize()) {
-            qWarning("Failed to initialize leds, trying out quirks.");
-            delete device;
-            if (quirksCombinationsIndex >= quirksCombinations.size()) {
-                qCritical("Tried all quirks combinations and none helped.");
-                return true;
-            }
-            quirks = quirksCombinations.at(quirksCombinationsIndex++);
-            inputValid = false;
-        } else {
-            qInfo("Successfully initialized LEDs.");
-            inputValid = true;
-        }
-    } while (!inputValid);
 
+    QString pclass;
+    QVector<RazerDeviceQuirks> quirks;
+
+    RazerDevice *device;
+    for (const QString &pclass_try : validPclass) {
+//         qDebug("Trying pclass %s", qUtf8Printable(pclass_try));
+        for (QVector<RazerDeviceQuirks> quirks_try : quirksCombinations) {
+            device = tryDevice(pclass_try, minimalFx, features, quirks_try);
+            if (device != nullptr) {
+                // Save the values that have worked
+                pclass = pclass_try;
+                quirks = quirks_try;
+                // Exit the loop
+                goto device_valid;
+            }
+        }
+    }
+    if (device == nullptr) {
+        qCritical("Tried all quirks and pclasses and none worked. Exiting");
+        return true;
+    }
+
+device_valid:
     for (auto led : device->getLeds()) {
         led->setOff();
     }
@@ -109,7 +133,7 @@ bool BringupUtil::newDevice()
     std::cout << "> ";
     input = cin.readLine();
     if (input.compare("y", Qt::CaseInsensitive) != 0) {
-        qInfo("That's bad :( Exiting for now (TODO: Test out existing quirks if they help)"); // TODO
+        qCritical("That's bad :( Exiting for now (TODO: Test out existing quirks if they help)"); // TODO
         return true;
     }
     for (auto led : device->getLeds()) {
