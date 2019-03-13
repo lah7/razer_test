@@ -49,7 +49,8 @@ private:
     RazerDevice *tryDevice(QString pclass, QStringList fx, QVector<RazerDeviceQuirks> quirks);
 
     const QVector<RazerLedId> allLedIds = {RazerLedId::ScrollWheelLED, RazerLedId::BatteryLED, RazerLedId::LogoLED, RazerLedId::BacklightLED, RazerLedId::MacroRecordingLED, RazerLedId::GameModeLED, RazerLedId::KeymapRedLED, RazerLedId::KeymapGreenLED, RazerLedId::KeymapBlueLED, RazerLedId::RightSideLED, RazerLedId::LeftSideLED};
-    const QStringList minimalFx = {"off", "static"};
+    // The case for super old devices, that just support "LED on" and "LED off", no brightness, no color
+    const QStringList minimalFx = {"off", "on"};
 };
 
 #endif // BRINGUPUTIL_H
