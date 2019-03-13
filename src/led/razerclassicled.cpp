@@ -236,6 +236,7 @@ bool RazerClassicLED::getBrightness(uchar *brightness)
 
 bool RazerClassicLED::setLedState(RazerClassicLedState state)
 {
+    qDebug("Called %s", Q_FUNC_INFO);
     razer_report report, response_report;
 
     report = razer_chroma_standard_set_led_state(RazerVarstore::STORE, this->ledId, state);
@@ -251,6 +252,7 @@ bool RazerClassicLED::setLedState(RazerClassicLedState state)
 
 bool RazerClassicLED::getLedState(RazerClassicLedState *state)
 {
+    qDebug("Called %s", Q_FUNC_INFO);
     razer_report report, response_report;
 
     report = razer_chroma_standard_get_led_state(RazerVarstore::STORE, this->ledId);
@@ -278,6 +280,7 @@ bool RazerClassicLED::ensureLedStateOn()
 
 bool RazerClassicLED::setLedEffect(RazerClassicEffectId effect)
 {
+    qDebug("Called %s", Q_FUNC_INFO);
     razer_report report, response_report;
 
     report = razer_chroma_standard_set_led_effect(RazerVarstore::STORE, this->ledId, effect);
@@ -290,6 +293,7 @@ bool RazerClassicLED::setLedEffect(RazerClassicEffectId effect)
 
 bool RazerClassicLED::getLedEffect(RazerClassicEffectId *effect)
 {
+    qDebug("Called %s", Q_FUNC_INFO);
     razer_report report, response_report;
 
     report = razer_chroma_standard_get_led_effect(RazerVarstore::STORE, this->ledId);
@@ -309,6 +313,7 @@ bool RazerClassicLED::getLedEffect(RazerClassicEffectId *effect)
 
 bool RazerClassicLED::setLedRgb(RGB color)
 {
+    qDebug("Called %s", Q_FUNC_INFO);
     razer_report report, response_report;
 
     report = razer_chroma_standard_set_led_rgb(RazerVarstore::STORE, this->ledId, color.r, color.g, color.b);
@@ -323,6 +328,7 @@ bool RazerClassicLED::setLedRgb(RGB color)
 
 bool RazerClassicLED::getLedRgb(RGB *color)
 {
+    qDebug("Called %s", Q_FUNC_INFO);
     razer_report report, response_report;
 
     report = razer_chroma_standard_get_led_rgb(RazerVarstore::STORE, this->ledId);
