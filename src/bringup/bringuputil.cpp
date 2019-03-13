@@ -43,13 +43,13 @@ const QVector<QVector<RazerDeviceQuirks>> quirksCombinations {
     {RazerDeviceQuirks::MatrixBrightness}
 };
 
-RazerDevice *BringupUtil::tryDevice(QString pclass, QStringList fx, QStringList features, QVector<RazerDeviceQuirks> quirks)
+RazerDevice *BringupUtil::tryDevice(QString pclass, QStringList fx, QVector<RazerDeviceQuirks> quirks)
 {
     RazerDevice *device;
     if (pclass == "classic") {
-        device = new RazerClassicDevice(hid_dev_info->path, hid_dev_info->vendor_id, hid_dev_info->product_id, /*name*/ "", /*type*/ "", allLedIds, minimalFx, validFeatures, quirks, /*dims*/{}, /*maxDPI*/0);
+        device = new RazerClassicDevice(hid_dev_info->path, hid_dev_info->vendor_id, hid_dev_info->product_id, /*name*/"", /*type*/"", allLedIds, fx, validFeatures, quirks, /*dims*/{}, /*maxDPI*/0);
     } else if (pclass == "matrix") {
-        device = new RazerMatrixDevice(hid_dev_info->path, hid_dev_info->vendor_id, hid_dev_info->product_id, /*name*/ "", /*type*/ "", allLedIds, validFx, validFeatures, quirks, /*dims*/{}, /*maxDPI*/0);
+        device = new RazerMatrixDevice(hid_dev_info->path, hid_dev_info->vendor_id, hid_dev_info->product_id, /*name*/"", /*type*/"", allLedIds, fx, validFeatures, quirks, /*dims*/{}, /*maxDPI*/0);
     } else {
         qFatal("Unhandled pclass in BringupUtil::tryDevice");
         return nullptr;
@@ -110,7 +110,7 @@ bool BringupUtil::newDevice()
     for (const QString &pclass_try : validPclass) {
 //         qDebug("Trying pclass %s", qUtf8Printable(pclass_try));
         for (QVector<RazerDeviceQuirks> quirks_try : quirksCombinations) {
-            device = tryDevice(pclass_try, minimalFx, features, quirks_try);
+            device = tryDevice(pclass_try, minimalFx, quirks_try);
             if (device != nullptr) {
                 // Save the values that have worked
                 pclass = pclass_try;

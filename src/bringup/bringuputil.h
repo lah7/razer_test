@@ -46,7 +46,7 @@ private:
     RazerDevice *device;
 
     bool setEffect(RazerLED *led, razer_test::RazerEffect effect, razer_test::RGB color1, razer_test::RGB color2, razer_test::RGB color3);
-    RazerDevice *tryDevice(QString pclass, QStringList fx, QStringList features, QVector<RazerDeviceQuirks> quirks);
+    RazerDevice *tryDevice(QString pclass, QStringList fx, QVector<RazerDeviceQuirks> quirks);
 
     const QVector<RazerLedId> allLedIds = {RazerLedId::ScrollWheelLED, RazerLedId::BatteryLED, RazerLedId::LogoLED, RazerLedId::BacklightLED, RazerLedId::MacroRecordingLED, RazerLedId::GameModeLED, RazerLedId::KeymapRedLED, RazerLedId::KeymapGreenLED, RazerLedId::KeymapBlueLED, RazerLedId::RightSideLED, RazerLedId::LeftSideLED};
     const QStringList minimalFx = {"off", "static"};
