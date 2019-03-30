@@ -206,7 +206,7 @@ razer_report razer_chroma_extended_matrix_get_brightness(RazerVarstore variable_
     return report;
 }
 
-razer_report razer_chroma_extended_matrix_set_custom_frame(unsigned char row_index, unsigned char start_col, unsigned char stop_col, unsigned char *rgb_data)
+razer_report razer_chroma_extended_matrix_set_custom_frame(unsigned char row_index, unsigned char start_col, unsigned char stop_col, const unsigned char *rgb_data)
 {
     struct razer_report report = get_razer_report(0x0F, 0x03, 0x47);
     size_t row_length = (size_t) (((stop_col + 1) - start_col) * 3);
